@@ -15,16 +15,14 @@
 #![no_std]
 #![no_main]
 
-extern crate panic_semihosting; // logs messages to the host stderr; requires a debugger
+extern crate panic_semihosting;
 
 use cortex_m_rt::entry;
 use cortex_m_semihosting::hprintln;
 
 #[entry]
 fn main() -> ! {
-    hprintln!("Hello, world!").unwrap();
-
-    loop {
-        // your code goes here
-    }
+    hprintln!("Hello {}", 42).unwrap();
+    //panic!("message is logged to debugger");
+    loop {}
 }
