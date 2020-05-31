@@ -18,11 +18,39 @@
 extern crate panic_semihosting;
 
 use cortex_m_rt::entry;
-use cortex_m_semihosting::hprintln;
+//use cortex_m_semihosting::hprintln;
+use stm32f4xx_hal as hal;
+
+use crate::hal::{prelude::*, stm32};
 
 #[entry]
 fn main() -> ! {
-    hprintln!("Hello {}", 42).unwrap();
-    //panic!("message is logged to debugger");
-    loop {}
+    //hprintln!("Start of main()").unwrap();
+    if let (Some(dp), Some(cp)) = (
+        stm32::Peripherals::take(),
+        cortex_m::peripheral::Peripherals::take(),
+    ) {
+        // Set up the LEDs.
+        let gpiob = dp.GPIOB.split();
+        let mut led1 = gpiob.pb5.into_push_pull_output();
+        let mut led2 = gpiob.pb4.into_push_pull_output();
+
+        // Set up the system clock. We want to run at 48MHz for this one.
+        let rcc = dp.RCC.constrain();
+        let clocks = rcc.cfgr.sysclk(84.mhz()).freeze();
+
+        // Create a delay abstraction based on SysTick
+        let mut delay = hal::delay::Delay::new(cp.SYST, clocks);
+
+        loop {
+            // On for 1s, off for 1s.
+            led1.set_high().unwrap();
+            led2.set_low().unwrap();
+            delay.delay_ms(1000_u32);
+            led1.set_low().unwrap();
+            led2.set_high().unwrap();
+            delay.delay_ms(1000_u32);
+        }
+    }
+    panic!("Failed to start!");
 }
