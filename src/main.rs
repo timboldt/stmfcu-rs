@@ -19,9 +19,11 @@ extern crate panic_semihosting;
 
 use cortex_m_rt::entry;
 //use cortex_m_semihosting::hprintln;
+use hal::block;
+use hal::prelude::*;
+use hal::serial::{config::Config, Serial};
+use hal::stm32;
 use stm32f4xx_hal as hal;
-
-use crate::hal::{prelude::*, stm32};
 
 #[entry]
 fn main() -> ! {
@@ -30,8 +32,10 @@ fn main() -> ! {
         stm32::Peripherals::take(),
         cortex_m::peripheral::Peripherals::take(),
     ) {
-        // Set up the LEDs.
+        let gpioa = dp.GPIOA.split();
         let gpiob = dp.GPIOB.split();
+
+        // Set up the LEDs.
         let mut led1 = gpiob.pb5.into_push_pull_output();
         let mut led2 = gpiob.pb4.into_push_pull_output();
 
@@ -39,17 +43,34 @@ fn main() -> ! {
         let rcc = dp.RCC.constrain();
         let clocks = rcc.cfgr.sysclk(84.mhz()).freeze();
 
+        // USART 1 at PA9 (TX) and PA10(RX)
+        let tx = gpioa.pa9.into_alternate_af7();
+        let rx = gpioa.pa10.into_alternate_af7();
+        let serial = Serial::usart1(
+            dp.USART1,
+            (tx, rx),
+            Config::default().baudrate(115_200.bps()),
+            clocks,
+        )
+        .unwrap();
+        let (mut tx, mut rx) = serial.split();
+
         // Create a delay abstraction based on SysTick
-        let mut delay = hal::delay::Delay::new(cp.SYST, clocks);
+        let mut _delay = hal::delay::Delay::new(cp.SYST, clocks);
 
         loop {
-            // On for 1s, off for 1s.
-            led1.set_high().unwrap();
-            led2.set_low().unwrap();
-            delay.delay_ms(1000_u32);
-            led1.set_low().unwrap();
-            led2.set_high().unwrap();
-            delay.delay_ms(1000_u32);
+            // Read character and echo it back
+            let received = block!(rx.read()).unwrap();
+            block!(tx.write(received)).ok();
+            if received % 2 == 1 {
+                led1.set_high().unwrap();
+                led2.set_low().unwrap();
+                //delay.delay_ms(1000_u32);
+            } else {
+                led1.set_low().unwrap();
+                led2.set_high().unwrap();
+                //delay.delay_ms(1000_u32);
+            }
         }
     }
     panic!("Failed to start!");
