@@ -17,16 +17,17 @@
             "servertype": "jlink",
             "preLaunchTask": "cargo build",
             "runToMain": true,
-            "svdFile": "${workspaceRoot}/.vscode/STM32F401.svd",
-            "swoConfig": {
-                "enabled": true,
-                "cpuFrequency": 16000000,
-                "swoFrequency": 2000000,
-                "source": "probe",
-                "decoders": [
-                    { "type": "console", "label": "ITM", "port": 0 }
-                ]
-            }
+            "svdFile": "${workspaceRoot}/.vscode/STM32F401.svd"
+            // ,
+            // "swoConfig": {
+            //     "enabled": true,
+            //     "cpuFrequency": 16000000,
+            //     "swoFrequency": 2000000,
+            //     "source": "probe",
+            //     "decoders": [
+            //         { "type": "console", "label": "ITM", "port": 0 }
+            //     ]
+            // }
         }
     ]
 }
