@@ -28,6 +28,32 @@
             //         { "type": "console", "label": "ITM", "port": 0 }
             //     ]
             // }
+        },
+        {
+            "type": "cortex-debug",
+            "request": "launch",
+            "name": "Debug (OpenOCD)",
+            "servertype": "openocd",
+            "cwd": "${workspaceRoot}",
+            "preLaunchTask": "cargo build",
+            "runToMain": true,
+            "executable": "./target/thumbv7em-none-eabihf/debug/stmfcu-rs",
+            "device": "STM32F401CC",
+            "configFiles": [
+                "interface/stlink-v2.cfg",
+                "target/stm32f4x.cfg"
+            ],
+            "svdFile": "${workspaceRoot}/.vscode/STM32F303.svd"
+            //,
+            // "swoConfig": {
+            //     "enabled": true,
+            //     "cpuFrequency": 84000000,
+            //     "swoFrequency": 2000000,
+            //     "source": "probe",
+            //     "decoders": [
+            //         { "type": "console", "label": "ITM", "port": 0 }
+            //     ]
+            // }
         }
     ]
 }

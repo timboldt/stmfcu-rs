@@ -56,7 +56,15 @@ fn main() -> ! {
         let (mut tx, mut rx) = serial.split();
 
         // Create a delay abstraction based on SysTick
-        let mut _delay = hal::delay::Delay::new(cp.SYST, clocks);
+        let mut delay = hal::delay::Delay::new(cp.SYST, clocks);
+
+        // Blink-blink.
+        led1.set_high().unwrap();
+        led2.set_low().unwrap();
+        delay.delay_ms(1000_u32);
+        led1.set_low().unwrap();
+        led2.set_high().unwrap();
+        delay.delay_ms(1000_u32);
 
         loop {
             // Read character and echo it back
@@ -65,7 +73,7 @@ fn main() -> ! {
             if received % 2 == 1 {
                 led1.set_high().unwrap();
                 led2.set_low().unwrap();
-                //delay.delay_ms(1000_u32);
+            //delay.delay_ms(1000_u32);
             } else {
                 led1.set_low().unwrap();
                 led2.set_high().unwrap();
